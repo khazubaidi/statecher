@@ -11,6 +11,7 @@ import io.github.khazubaidi.extendables.StatecherValidator;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
+import io.github.khazubaidi.objects.OneTimeTokeMetadata;
 import io.github.khazubaidi.utils.BeanUtils;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,22 +33,22 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
     private final PermissionValidator permissionValidator;
     private final BeanUtils beanUtils;
     private final EntityManagerFactory entityManagerFactory;
+    private final OneTimeTokenService oneTimeTokenService;
 
     @Override
-    public void process(String name, Object id, String transitionId){
+    public void process(String token, String initiator, String transitionId){
 
-        //TODO find object from redis
-        String initiator = "from-redis";
-        boolean doseStatecherExists = statecherRegistry.exists(name);
+        OneTimeTokeMetadata metadata = oneTimeTokenService.consume(initiator, token);
+        boolean doseStatecherExists = statecherRegistry.exists(metadata.getName());
         if(!doseStatecherExists)
             throw new RuntimeException();
 
-        Statecher stateacher = statecherRegistry.get(name);
-        Statechable entity = getEntity(id, stateacher.getEntity());
+        Statecher stateacher = statecherRegistry.get(metadata.getName());
+        Statechable entity = getEntity(metadata.getId(), stateacher.getEntity());
         boolean hasState = hasState(stateacher, entity.getState());
 
         if(!hasState)
-            throw new StatecherStateNotFoundException("State (" + entity.getState() + ") not found within statecher (" + name + ").");
+            throw new StatecherStateNotFoundException("State (" + entity.getState() + ") not found within statecher (" + metadata.getName() + ").");
 
         State state = findState(stateacher, entity.getState());
 
@@ -69,7 +70,7 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         transaction.begin();
 
         runBefore(state, entity, initiator);
-        setState(id, stateacher.getEntity(), transition.getValue());
+        setState(metadata.getId(), stateacher.getEntity(), transition.getValue());
         runAfter(state, entity, initiator);
 
         transaction.commit();

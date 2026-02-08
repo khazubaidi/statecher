@@ -8,4 +8,10 @@ public class StatecherException extends RuntimeException {
 
         super(message, cause);
     }
+
+    public StatecherException(
+            String message) {
+
+        super(message);
+    }
 }

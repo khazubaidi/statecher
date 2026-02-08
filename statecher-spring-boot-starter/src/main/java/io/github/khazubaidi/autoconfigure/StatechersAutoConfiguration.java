@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.configurations.IdGenerator;
 import io.github.khazubaidi.configurations.PermissionValidator;
-import io.github.khazubaidi.service.StatecherInitiateService;
-import io.github.khazubaidi.service.StatecherInitiateServiceImpl;
-import io.github.khazubaidi.service.StatecherProcessService;
-import io.github.khazubaidi.service.StatecherProcessServiceImpl;
+import io.github.khazubaidi.service.*;
 import io.github.khazubaidi.utils.BeanUtils;
 import io.github.khazubaidi.utils.BeanUtilsImpl;
 import io.github.khazubaidi.validations.JsonSchemaValidator;
@@ -20,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.persistence.EntityManagerFactory;
 
@@ -64,14 +62,16 @@ public class StatechersAutoConfiguration {
             StatecherRegistry statecherRegistry,
             PermissionValidator permissionValidator,
             BeanUtils beanUtils,
-            EntityManagerFactory entityManagerFactory) {
+            EntityManagerFactory entityManagerFactory,
+            OneTimeTokenService oneTimeTokenService) {
 
         return new StatecherInitiateServiceImpl(
                 idGenerator,
                 statecherRegistry,
                 permissionValidator,
                 beanUtils,
-                entityManagerFactory);
+                entityManagerFactory,
+                oneTimeTokenService);
     }
 
     @Bean
@@ -80,13 +80,15 @@ public class StatechersAutoConfiguration {
             StatecherRegistry statecherRegistry,
             PermissionValidator permissionValidator,
             BeanUtils beanUtils,
-            EntityManagerFactory entityManagerFactory) {
+            EntityManagerFactory entityManagerFactory,
+            OneTimeTokenService oneTimeTokenService) {
 
         return new StatecherProcessServiceImpl(
                 statecherRegistry,
                 permissionValidator,
                 beanUtils,
-                entityManagerFactory);
+                entityManagerFactory,
+                oneTimeTokenService);
     }
 
     @Bean
@@ -115,14 +117,14 @@ public class StatechersAutoConfiguration {
                 beanReferenceValidator);
     }
 
-//    @Bean
-//    public StatechersConfiguration statechersConfiguration(StatechersLoader statechersLoader,
-//                                                           BeanReferenceValidator beanReferenceValidator,
-//                                                           StatechersRegistry statechersRegistry) {
-//
-//        return new StatechersConfiguration(
-//                statechersLoader,
-//                beanReferenceValidator,
-//                statechersRegistry);
-//    }
+    @Bean
+    @ConditionalOnMissingBean
+    public OneTimeTokenService oneTimeTokenService(
+            StringRedisTemplate resourceResolver,
+            ObjectMapper objectMapper) {
+
+        return new OneTimeTokenServiceImpl(
+                resourceResolver,
+                objectMapper);
+    }
 }

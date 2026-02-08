@@ -8,6 +8,7 @@ import io.github.khazubaidi.extendables.StatecherValidator;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
+import io.github.khazubaidi.objects.OneTimeTokeMetadata;
 import io.github.khazubaidi.objects.StatecherObject;
 import io.github.khazubaidi.utils.BeanUtils;
 
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class StatecherInitiateServiceImpl<T> implements StatecherInitiateService
     private final PermissionValidator permissionValidator;
     private final BeanUtils beanUtils;
     private final EntityManagerFactory entityManagerFactory;
+    private final OneTimeTokenService oneTimeTokenService;
 
     @Override
     public StatecherObject initiate(String name, Object id, String initiator){
@@ -62,9 +65,10 @@ public class StatecherInitiateServiceImpl<T> implements StatecherInitiateService
 
         List<Transition> transitions = getTransitions(stateacher.getTransitions(), state.getTransitions());
 
-        //store in database or redis...etc
+        OneTimeTokeMetadata metadata = new OneTimeTokeMetadata(name, id);
+        String token = oneTimeTokenService.<OneTimeTokeMetadata>create(initiator + ":" + name, metadata, Duration.ofMinutes(10));
         return new StatecherObject(
-                idGenerator.generate(),
+                token,
                 transitions);
     }
 
