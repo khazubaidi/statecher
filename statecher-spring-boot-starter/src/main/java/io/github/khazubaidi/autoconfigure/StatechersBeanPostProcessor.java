@@ -1,6 +1,6 @@
 package io.github.khazubaidi.autoconfigure;
 
-import io.github.khazubaidi.bootstrapers.StatechersRegistry;
+import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.models.Statecher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,25 +13,25 @@ public class StatechersBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(StatechersBeanPostProcessor.class);
 
-    private final StatechersLoader statechersLoader;
+    private final StatecherLoader statecherLoader;
     private final BeanReferenceValidator beanReferenceValidator;
-    private final StatechersRegistry statechersRegistry;
+    private final StatecherRegistry statecherRegistry;
     private boolean validated = false;
 
     public StatechersBeanPostProcessor(
-            StatechersLoader statechersLoader,
+            StatecherLoader statecherLoader,
             BeanReferenceValidator beanReferenceValidator,
-            StatechersRegistry statechersRegistry) {
+            StatecherRegistry statecherRegistry) {
 
-        this.statechersLoader = statechersLoader;
+        this.statecherLoader = statecherLoader;
         this.beanReferenceValidator = beanReferenceValidator;
-        this.statechersRegistry = statechersRegistry;
+        this.statecherRegistry = statecherRegistry;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
-        if (!validated && bean instanceof StatechersLoader && statechersLoader != null) {
+        if (!validated && bean instanceof StatecherLoader && statecherLoader != null) {
 
             try {
 
@@ -50,7 +50,7 @@ public class StatechersBeanPostProcessor implements BeanPostProcessor {
     private void validateAllBeanReferences() {
 
         log.info("Validating statechers bean references");
-        for (Statecher statecher : statechersRegistry.getAllStatechers()) {
+        for (Statecher statecher : statecherRegistry.getAllStatechers()) {
 
             log.debug("Validating statecher: {}", statecher.getName());
             beanReferenceValidator.validate(statecher);

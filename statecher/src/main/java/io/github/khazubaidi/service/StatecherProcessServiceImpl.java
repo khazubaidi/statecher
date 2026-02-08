@@ -1,11 +1,13 @@
 package io.github.khazubaidi.service;
 
-import io.github.khazubaidi.bootstrapers.StatechersRegistry;
+import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.configurations.PermissionValidator;
+import io.github.khazubaidi.exceptions.StatecherException;
+import io.github.khazubaidi.exceptions.StatecherStateNotFoundException;
 import io.github.khazubaidi.markers.Statechable;
-import io.github.khazubaidi.markers.StatecherAfterTransition;
-import io.github.khazubaidi.markers.StatecherBeforeTransition;
-import io.github.khazubaidi.markers.StatecherValidator;
+import io.github.khazubaidi.extendables.StatecherAfterTransition;
+import io.github.khazubaidi.extendables.StatecherBeforeTransition;
+import io.github.khazubaidi.extendables.StatecherValidator;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
@@ -26,7 +28,7 @@ import java.util.*;
 @Slf4j
 public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T> {
 
-    private final StatechersRegistry statechersRegistry;
+    private final StatecherRegistry statecherRegistry;
     private final PermissionValidator permissionValidator;
     private final BeanUtils beanUtils;
     private final EntityManagerFactory entityManagerFactory;
@@ -36,22 +38,20 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
 
         //TODO find object from redis
         String initiator = "from-redis";
-        boolean doseStatecherExists = statechersRegistry.exists(name);
+        boolean doseStatecherExists = statecherRegistry.exists(name);
         if(!doseStatecherExists)
             throw new RuntimeException();
 
-        Statecher stateacher = statechersRegistry.get(name);
+        Statecher stateacher = statecherRegistry.get(name);
         Statechable entity = getEntity(id, stateacher.getEntity());
         boolean hasState = hasState(stateacher, entity.getState());
 
-        if(!hasState){
-
-            return;
-        }
+        if(!hasState)
+            throw new StatecherStateNotFoundException("State (" + entity.getState() + ") not found within statecher (" + name + ").");
 
         State state = findState(stateacher, entity.getState());
 
-        boolean doseLoginUserHasPermission = permissionValidator.has(state.getPermissions());
+        boolean doseLoginUserHasPermission = permissionValidator.hasAny(state.getPermissions());
         if(!doseLoginUserHasPermission)
             return;
 

@@ -1,8 +1,8 @@
 package io.github.khazubaidi.autoconfigure;
 
-import io.github.khazubaidi.exceptions.ValidationException;
-import io.github.khazubaidi.markers.StatecherAfterTransition;
-import io.github.khazubaidi.markers.StatecherBeforeTransition;
+import io.github.khazubaidi.exceptions.StatecherValidationException;
+import io.github.khazubaidi.extendables.StatecherAfterTransition;
+import io.github.khazubaidi.extendables.StatecherBeforeTransition;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +43,7 @@ public class BeanReferenceValidator {
     private void validateEntities(String entityClass)  {
 
         if(StringUtils.isBlank(entityClass))
-            throw new ValidationException("Repository is required");
+            throw new StatecherValidationException("Repository is required");
 
         try {
 
@@ -57,14 +57,14 @@ public class BeanReferenceValidator {
 
         } catch (ClassNotFoundException e) {
 
-            throw new ValidationException("Bean " + entityClass + " not found.");
+            throw new StatecherValidationException("Bean " + entityClass + " not found.");
         }
     }
 
     private void validateTransitions(Map<String, State> states) {
 
         if (CollectionUtils.isEmpty(states))
-            throw new ValidationException("States is required");
+            throw new StatecherValidationException("States is required");
 
         Set<String> beforeTransition = states.values()
                 .stream()
@@ -99,7 +99,7 @@ public class BeanReferenceValidator {
                 log.debug("Service bean found: {}", reference);
             } catch (NoSuchBeanDefinitionException | ClassNotFoundException e) {
 
-                throw new ValidationException("Bean " + reference + " must implement " + type.getName());
+                throw new StatecherValidationException("Bean " + reference + " must implement " + type.getName());
             }
         }
     }

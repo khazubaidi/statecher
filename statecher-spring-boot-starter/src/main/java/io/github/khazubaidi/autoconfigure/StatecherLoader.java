@@ -1,6 +1,6 @@
 package io.github.khazubaidi.autoconfigure;
 
-import io.github.khazubaidi.bootstrapers.StatechersRegistry;
+import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.validations.JsonSchemaValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,32 +14,31 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import java.io.InputStream;
 import java.util.Set;
 
-public class StatechersLoader implements InitializingBean {
+public class StatecherLoader implements InitializingBean {
 
-    private static final Logger log = LoggerFactory.getLogger(StatechersLoader.class);
-    private static final String SCHEMA_FILENAME = "statecher.schema.json";
+    private static final Logger log = LoggerFactory.getLogger(StatecherLoader.class);
 
     private final ResourcePatternResolver resourceResolver;
     private final ObjectMapper objectMapper;
     private final JsonSchemaValidator schemaValidator;
-    private final StatechersRegistry statechersRegistry;
+    private final StatecherRegistry statecherRegistry;
     private final StatecherProperties properties;
     private final BeanReferenceValidator beanReferenceValidator;
 
-    public StatechersLoader(
+    public StatecherLoader(
             ResourcePatternResolver resourceResolver,
             ObjectMapper objectMapper,
             JsonSchemaValidator schemaValidator,
-            StatechersRegistry statechersRegistry,
+            StatecherRegistry statecherRegistry,
             StatecherProperties properties,
             BeanReferenceValidator beanReferenceValidator) {
 
-    this.resourceResolver = resourceResolver;
-    this.objectMapper = objectMapper;
-    this.schemaValidator = schemaValidator;
-    this.statechersRegistry = statechersRegistry;
-    this.properties = properties;
-    this.beanReferenceValidator = beanReferenceValidator;
+        this.resourceResolver = resourceResolver;
+        this.objectMapper = objectMapper;
+        this.schemaValidator = schemaValidator;
+        this.statecherRegistry = statecherRegistry;
+        this.properties = properties;
+        this.beanReferenceValidator = beanReferenceValidator;
     }
 
 @Override
@@ -47,7 +46,7 @@ public class StatechersLoader implements InitializingBean {
 
         if (!properties.isEnabled()) {
 
-            log.info("Statechers loading is disabled");
+            log.info("Statecher is disabled");
             return;
         }
 
@@ -60,8 +59,7 @@ public class StatechersLoader implements InitializingBean {
 
         try {
 
-            Resource[] resources = resourceResolver.getResources(configLocation + "*.json");
-
+            Resource[] resources = resourceResolver.getResources(configLocation + "*." + StatecherProperties.STATECHERS_FILE_TYPE);
             if (resources.length == 0) {
 
                 log.info("No statechers configuration files found in {}", configLocation);
@@ -71,14 +69,14 @@ public class StatechersLoader implements InitializingBean {
             for (Resource resource : resources) {
 
                 String filename = resource.getFilename();
-                if (filename == null || filename.equals(SCHEMA_FILENAME))
+                if (filename == null || filename.equals(StatecherProperties.SCHEMA_FILENAME))
                     return;
 
-                String statecherName = filename.replace(".json", "");
+                String statecherName = filename.replace("." + StatecherProperties.STATECHERS_FILE_TYPE, "");
                 loadStatecher(statecherName, resource);
             }
 
-            log.info("Loaded {} statecher(s)", statechersRegistry.size());
+            log.info("Loaded {} statecher(s)", statecherRegistry.size());
 
         } catch (Exception e) {
 
@@ -101,20 +99,20 @@ public class StatechersLoader implements InitializingBean {
 
         } catch (Exception e) {
 
-            log.error("Failed to load statecher: {}", name, e);
-            throw new RuntimeException("Failed to load statecher: " + name, e);
+            log.error("statecher: {} had failed to load.", name);
+            throw new RuntimeException("statecher: " + name + " had failed to load", e);
         }
 
         try (InputStream inputStream = resource.getInputStream()) {
 
             Statecher statecher = objectMapper.readValue(inputStream, Statecher.class);
             beanReferenceValidator.validate(statecher);
-            statechersRegistry.register(statecher.getName(), statecher);
-            log.info("Successfully loaded statecher: {}", name);
+            statecherRegistry.register(statecher.getName(), statecher);
+            log.info("statecher: {} loaded successfully", name);
         } catch (Exception e) {
 
-            log.error("Failed to parse statecher: {}", name, e);
-            throw new RuntimeException("Failed to parse statecher: " + name, e);
+            log.error("statecher: {} had failed to parse.", name);
+            throw new RuntimeException("statecher: " + name + " had failed to parse.", e);
         }
     }
 }

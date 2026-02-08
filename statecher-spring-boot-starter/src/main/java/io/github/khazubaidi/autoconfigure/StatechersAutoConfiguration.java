@@ -1,7 +1,7 @@
 package io.github.khazubaidi.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.khazubaidi.bootstrapers.StatechersRegistry;
+import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.configurations.IdGenerator;
 import io.github.khazubaidi.configurations.PermissionValidator;
 import io.github.khazubaidi.service.StatecherInitiateService;
@@ -21,7 +21,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 @Configuration
@@ -42,9 +41,9 @@ public class StatechersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public StatechersRegistry statechersRegistry() {
+    public StatecherRegistry statechersRegistry() {
 
-        return new StatechersRegistry();
+        return new StatecherRegistry();
     }
 
     @Bean
@@ -62,14 +61,14 @@ public class StatechersAutoConfiguration {
     @ConditionalOnMissingBean
     public StatecherInitiateService statecherInitiateService(
             IdGenerator idGenerator,
-            StatechersRegistry statechersRegistry,
+            StatecherRegistry statecherRegistry,
             PermissionValidator permissionValidator,
             BeanUtils beanUtils,
             EntityManagerFactory entityManagerFactory) {
 
         return new StatecherInitiateServiceImpl(
                 idGenerator,
-                statechersRegistry,
+                statecherRegistry,
                 permissionValidator,
                 beanUtils,
                 entityManagerFactory);
@@ -78,13 +77,13 @@ public class StatechersAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public StatecherProcessService statecherProcessService(
-            StatechersRegistry statechersRegistry,
+            StatecherRegistry statecherRegistry,
             PermissionValidator permissionValidator,
             BeanUtils beanUtils,
             EntityManagerFactory entityManagerFactory) {
 
         return new StatecherProcessServiceImpl(
-                statechersRegistry,
+                statecherRegistry,
                 permissionValidator,
                 beanUtils,
                 entityManagerFactory);
@@ -100,18 +99,18 @@ public class StatechersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public StatechersLoader statechersLoader(ResourcePatternResolver resourceResolver,
-                                             ObjectMapper objectMapper,
-                                             JsonSchemaValidator schemaValidator,
-                                             StatechersRegistry statechersRegistry,
-                                             StatecherProperties properties,
-                                             BeanReferenceValidator beanReferenceValidator) {
+    public StatecherLoader statechersLoader(ResourcePatternResolver resourceResolver,
+                                            ObjectMapper objectMapper,
+                                            JsonSchemaValidator schemaValidator,
+                                            StatecherRegistry statecherRegistry,
+                                            StatecherProperties properties,
+                                            BeanReferenceValidator beanReferenceValidator) {
 
-        return new StatechersLoader(
+        return new StatecherLoader(
                 resourceResolver,
                 objectMapper,
                 schemaValidator,
-                statechersRegistry,
+                statecherRegistry,
                 properties,
                 beanReferenceValidator);
     }

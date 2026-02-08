@@ -5,6 +5,5 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
 public interface StatecherRepository<T extends Statechable, ID>
-
         extends JpaRepository<T, ID> {
 }

@@ -1,22 +1,21 @@
 package io.github.khazubaidi.service;
 
-import io.github.khazubaidi.bootstrapers.StatechersRegistry;
+import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.configurations.IdGenerator;
 import io.github.khazubaidi.configurations.PermissionValidator;
 import io.github.khazubaidi.markers.Statechable;
-import io.github.khazubaidi.markers.StatecherValidator;
+import io.github.khazubaidi.extendables.StatecherValidator;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
 import io.github.khazubaidi.objects.StatecherObject;
 import io.github.khazubaidi.utils.BeanUtils;
-import javax.persistence.EntityManager;
+
 import javax.persistence.EntityManagerFactory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -26,7 +25,7 @@ import java.util.*;
 public class StatecherInitiateServiceImpl<T> implements StatecherInitiateService<T> {
 
     private final IdGenerator idGenerator;
-    private final StatechersRegistry statechersRegistry;
+    private final StatecherRegistry statecherRegistry;
     private final PermissionValidator permissionValidator;
     private final BeanUtils beanUtils;
     private final EntityManagerFactory entityManagerFactory;
@@ -34,11 +33,11 @@ public class StatecherInitiateServiceImpl<T> implements StatecherInitiateService
     @Override
     public StatecherObject initiate(String name, Object id, String initiator){
 
-        boolean doseStatecherExists = statechersRegistry.exists(name);
+        boolean doseStatecherExists = statecherRegistry.exists(name);
         if(!doseStatecherExists)
             throw new RuntimeException();
 
-        Statecher stateacher = statechersRegistry.get(name);
+        Statecher stateacher = statecherRegistry.get(name);
         Statechable entity = getEntity(id, stateacher.getEntity());
         boolean hasState = hasState(stateacher, entity.getState());
 
@@ -51,7 +50,7 @@ public class StatecherInitiateServiceImpl<T> implements StatecherInitiateService
 
         State state = findState(stateacher, entity.getState());
 
-        boolean doseLoginUserHasPermission = permissionValidator.has(state.getPermissions());
+        boolean doseLoginUserHasPermission = permissionValidator.hasAny(state.getPermissions());
         if(!doseLoginUserHasPermission)
             return new StatecherObject(
                     idGenerator.generate(),

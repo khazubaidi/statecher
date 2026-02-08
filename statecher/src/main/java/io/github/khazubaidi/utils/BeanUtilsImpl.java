@@ -1,5 +1,6 @@
 package io.github.khazubaidi.utils;
 
+import io.github.khazubaidi.exceptions.StatecherException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -24,16 +25,7 @@ public class BeanUtilsImpl implements BeanUtils {
             return type.cast(bean);
         } catch (ClassNotFoundException e) {
 
-            throw new RuntimeException(e);
+            throw new StatecherException("Bean (" + name + ") not found.", e.getCause());
         }
-
-    }
-
-    @Override
-    public <T> List<T> findByName(List<String> names, Class<T> type) {
-
-        return names.stream()
-                .map(name-> findByName(name, type))
-                .collect(Collectors.toList());
     }
 }

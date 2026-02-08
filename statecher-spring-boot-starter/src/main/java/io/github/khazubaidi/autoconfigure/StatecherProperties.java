@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class StatecherProperties {
 
     public static final String SCHEMA_LOCATION = "classpath:statechers.schema.json";
+    public static final String SCHEMA_FILENAME = "statecher.schema.json";
+    public static final String STATECHERS_FILE_TYPE = "json";
 
     private String path = "classpath:/statechers/";
     private boolean enabled = true;
@@ -13,7 +15,7 @@ public class StatecherProperties {
     public String getPath() {
         return path;
     }
-
+    
     public void setPath(String path) {
         this.path = path;
     }

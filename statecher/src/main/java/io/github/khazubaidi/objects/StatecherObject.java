@@ -16,7 +16,8 @@ public class StatecherObject {
     public StatecherObject(String id, List<io.github.khazubaidi.models.Transition> transitions){
 
         this.id = id;
-        this.transitions = transitions.stream().map(transition -> new Transition(transition.getId(), transition.getExtras()))
+        this.transitions = transitions.stream()
+                .map(transition -> new Transition(transition.getId(), transition.getExtras()))
                 .collect(Collectors.toList());
     }
 
