@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Statechers Workflow Configuration",
+  "type": "object",
+  "required": ["name", "entity", "transitions", "states"],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "entity": {
+      "type": "string"
+    },
+    "transitions": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/transition"
+      }
+    },
+    "states": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/state"
+      }
+    }
+  },
+  "$defs": {
+    "transition": {
+      "type": "object",
+      "required": ["value", "id"],
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "extras": {
+          "$ref": "#/$defs/extras"
+        }
+      },
+      "additionalProperties": false
+    },
+    "extras": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "state": {
+      "type": "object",
+      "required": ["transitions"],
+      "properties": {
+        "validators": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "before": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "after": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "permissions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "transitions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
