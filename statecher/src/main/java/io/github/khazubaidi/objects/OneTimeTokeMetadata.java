@@ -1,12 +1,14 @@
 package io.github.khazubaidi.objects;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
+
+import java.io.Serializable;
 
 @Getter
+@Setter
 @AllArgsConstructor
-public class OneTimeTokeMetadata {
+@NoArgsConstructor
+public class OneTimeTokeMetadata implements Serializable {
 
     private String name;
     private Object id;
