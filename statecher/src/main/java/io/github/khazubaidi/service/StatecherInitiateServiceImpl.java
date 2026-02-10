@@ -66,7 +66,7 @@ public class StatecherInitiateServiceImpl<T> implements StatecherInitiateService
         List<Transition> transitions = getTransitions(stateacher.getTransitions(), state.getTransitions());
 
         OneTimeTokeMetadata metadata = new OneTimeTokeMetadata(name, id);
-        String token = oneTimeTokenService.<OneTimeTokeMetadata>create(initiator + ":" + name, metadata, Duration.ofMinutes(10));
+        String token = oneTimeTokenService.<OneTimeTokeMetadata>create(initiator, metadata, Duration.ofMinutes(10));
         return new StatecherObject(
                 token,
                 transitions);

@@ -1,9 +1,11 @@
 package io.github.khazubaidi.service;
 
+import io.github.khazubaidi.objects.OneTimeTokeMetadata;
+
 import java.time.Duration;
 
 public interface OneTimeTokenService {
 
-    <T> String create(String key, T data, Duration ttl);
-    <T> T consume(String key, String token);
+    String create(String key, OneTimeTokeMetadata data, Duration ttl);
+    OneTimeTokeMetadata consume(String key, String token);
 }

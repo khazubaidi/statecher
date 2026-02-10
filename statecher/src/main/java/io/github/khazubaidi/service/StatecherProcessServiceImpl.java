@@ -16,6 +16,10 @@ import io.github.khazubaidi.utils.BeanUtils;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
+import io.github.khazubaidi.utils.TypesUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -65,16 +69,9 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
                 .findFirst()
                 .orElseThrow();
 
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
-        transaction.begin();
-
         runBefore(state, entity, initiator);
         setState(metadata.getId(), stateacher.getEntity(), transition.getValue());
         runAfter(state, entity, initiator);
-
-        transaction.commit();
-        entityManager.close();
     }
 
     public boolean runValidators(State state, Statechable statechable, String initiator){
@@ -139,7 +136,8 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         try {
 
             Class<?> klass = Class.forName(entityClass);
-            Object entity = entityManagerFactory.createEntityManager().find(klass, id);
+            Class<?> idType = getIdType(klass);
+            Object entity = entityManagerFactory.createEntityManager().find(klass, TypesUtils.convertId(id, idType));
 
             if (!(entity instanceof Statechable))
                 throw new IllegalStateException("Entity does not implement Stateched");
@@ -151,9 +149,22 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         }
     }
 
+    public Class<?> getIdType(Class<?> entityClass) {
+
+        Metamodel metamodel = entityManagerFactory.createEntityManager().getMetamodel();
+        EntityType<?> entityType = metamodel.entity(entityClass);
+
+        return entityType.getIdType().getJavaType();
+    }
+
     public void setState(Object id, String entityClass, Object value) {
 
-        Object entity = getEntity(id, entityClass);
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        transaction.begin();
+        Object entity =  entityManager.merge(getEntity(id, entityClass));
         ((Statechable) entity).setState(value);
+        transaction.commit();
+        entityManager.close();
     }
 }

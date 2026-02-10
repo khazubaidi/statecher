@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.khazubaidi.configurations.IdGenerator;
 import io.github.khazubaidi.exceptions.StatecherException;
+import io.github.khazubaidi.objects.OneTimeTokeMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,7 +24,8 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public <T> String create(String key, T data, Duration ttl) {
+    public String create(String key, OneTimeTokeMetadata data, Duration ttl) {
+
 
         String token = UUID.randomUUID().toString();
         redisTemplate.opsForValue().set(
@@ -31,24 +33,19 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
                 "ONETIMETOKEN",
                 ttl);
 
-        redisTemplate.opsForValue().set(
-                key(TOKEN_METADATA_BUCKET, key, token),
-                "ONETIMETOKEN",
-                ttl);
-
+        keepMetadata(key, token, ttl.plusMinutes(5), data);
         return token;
     }
 
     @Override
-    public <T> T consume(String key, String token) {
+    public OneTimeTokeMetadata consume(String key, String token) {
 
         Boolean existed = redisTemplate.delete(key(ONE_TIME_TOKEN_BUKET, key, token));
 
-        if (Boolean.FALSE.equals(existed))
+        if (!existed)
             throw new StatecherException("One time token expired/used.");
 
-        TypeReference<T> typeRef = new TypeReference<T>() {};
-        return getAndClearMetadata(key, token, typeRef);
+        return getAndClearMetadata(key, token);
     }
 
     public void keepMetadata(String key, String token, Duration ttl, Object data){
@@ -66,13 +63,13 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
         }
     }
 
-    public <T> T getAndClearMetadata(String key, String token, TypeReference<T> klass){
+    public OneTimeTokeMetadata getAndClearMetadata(String key, String token){
 
         try {
 
             String value = redisTemplate.opsForValue().get(key(TOKEN_METADATA_BUCKET, key, token));
             redisTemplate.delete(key(TOKEN_METADATA_BUCKET, key, token));
-            return objectMapper.readValue(value, klass);
+            return objectMapper.readValue(value, new TypeReference<OneTimeTokeMetadata>() {});
         } catch (JsonProcessingException e) {
 
             throw new RuntimeException(e);
