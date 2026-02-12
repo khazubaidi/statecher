@@ -3,7 +3,7 @@
 
   <groupId>io.github.khazubaidi</groupId>
   <artifactId>statecher-parent</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>statecher-parent</name>
   <packaging>pom</packaging>
 
@@ -55,6 +55,13 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <distributionManagement>
+    <repository>
+      <id>central</id>
+      <url>https://central.sonatype.com/api/v1/publisher</url>
+    </repository>
+  </distributionManagement>
 
   <modules>
     <module>statecher</module>
