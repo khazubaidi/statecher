@@ -12,7 +12,7 @@
   <packaging>jar</packaging>
 
   <name>Statecher Spring Boot Starter</name>
-  <description>Spring Boot Starter for Statecher library</description>
+  <description>Statecher a state machine engine spring boot starter</description>
   <url>https://github.com/khazubaidi/statecher</url>
 
   <developers>
@@ -37,18 +37,6 @@
     <developerConnection>scm:git:ssh://git@github.com:khazubaidi/statecher.git</developerConnection>
     <url>https://github.com/khazubaidi/statecher</url>
   </scm>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <dependency>

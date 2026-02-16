@@ -7,7 +7,7 @@
   <name>statecher-parent</name>
   <packaging>pom</packaging>
 
-  <description>Spring Boot Starter for Statecher library</description>
+  <description>Statecher a state machine engine</description>
   <url>https://github.com/khazubaidi/statecher</url>
 
   <distributionManagement>
@@ -22,7 +22,7 @@
   </distributionManagement>
 
   <properties>
-    <spring.version>2.5.15</spring.version>
+    <spring.version>2.5.13</spring.version>
     <java.version>11</java.version>
     <lombok.version>1.18.42</lombok.version>
     <json-schema-validator.version>1.0.65</json-schema-validator.version>
