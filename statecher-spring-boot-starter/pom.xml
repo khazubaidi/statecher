@@ -5,7 +5,7 @@
   <parent>
     <artifactId>statecher-parent</artifactId>
     <groupId>io.github.khazubaidi</groupId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
   </parent>
 
   <artifactId>statecher-spring-boot-starter</artifactId>
@@ -14,6 +14,41 @@
   <name>Statecher Spring Boot Starter</name>
   <description>Spring Boot Starter for Statecher library</description>
   <url>https://github.com/khazubaidi/statecher</url>
+
+  <developers>
+    <developer>
+      <id>khazubaidi</id>
+      <name>Khaled Alzubaidi</name>
+      <email>khazubaidi@berelayed.com</email>
+      <url>https://github.com/khazubaidi</url>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/khazubaidi/statecher.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:khazubaidi/statecher.git</developerConnection>
+    <url>https://github.com/khazubaidi/statecher</url>
+  </scm>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -59,34 +94,12 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <extensions>true</extensions>
         <configuration>
-          <includes>
-            <include>**/*Test.java</include>
-            <include>**/*Tests.java</include>
-          </includes>
+          <publishingServerId>central</publishingServerId>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.10</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>report</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
