@@ -23,16 +23,21 @@
 
   <properties>
     <spring.version>2.5.13</spring.version>
+    <spring.data.version>2.5.11</spring.data.version>
+    <spring.web>5.3.19</spring.web>
     <java.version>11</java.version>
     <lombok.version>1.18.42</lombok.version>
-    <json-schema-validator.version>1.0.65</json-schema-validator.version>
+    <json.schema.validator.version>1.0.88</json.schema.validator.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>5.10.0</junit.version>
+    <javax.persistence>2.2</javax.persistence>
     <mockito.version>5.5.0</mockito.version>
     <assertj.version>3.24.2</assertj.version>
     <jacoco.version>0.8.10</jacoco.version>
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <sonatype.deploy.version>0.10.0</sonatype.deploy.version>
+    <h2.database.version>2.4.240</h2.database.version>
+    <junit.jupiter.version>6.0.3</junit.jupiter.version>
   </properties>
 
   <dependencyManagement>
