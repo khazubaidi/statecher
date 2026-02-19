@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>statecher-parent</artifactId>
-    <groupId>io.github.khazubaidi</groupId>
-    <version>0.0.1</version>
-  </parent>
 
   <artifactId>statecher</artifactId>
   <packaging>jar</packaging>
+  <groupId>io.github.khazubaidi</groupId>
+  <version>0.0.2</version>
 
   <name>Statecher</name>
-  <description>State machine engine library</description>
+  <description>State machine engine core</description>
   <url>https://github.com/khazubaidi/statecher</url>
 
   <developers>
@@ -31,11 +28,47 @@
     </license>
   </licenses>
 
+  <scm>
+    <connection>scm:git:https://github.com/khazubaidi/statecher.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:khazubaidi/statecher.git</developerConnection>
+    <url>https://github.com/khazubaidi/statecher</url>
+  </scm>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <properties>
+    <spring.version>2.5.13</spring.version>
+    <spring.data.version>2.5.11</spring.data.version>
+    <spring.web>5.3.19</spring.web>
+    <java.version>11</java.version>
+    <lombok.version>1.18.42</lombok.version>
+    <json.schema.validator.version>1.0.88</json.schema.validator.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.version>5.10.0</junit.version>
+    <javax.persistence>2.2</javax.persistence>
+    <mockito.version>5.5.0</mockito.version>
+    <assertj.version>3.24.2</assertj.version>
+    <jacoco.version>0.8.10</jacoco.version>
+    <maven.compiler.release>${java.version}</maven.compiler.release>
+    <sonatype.deploy.version>0.10.0</sonatype.deploy.version>
+    <h2.database.version>2.4.240</h2.database.version>
+    <junit.jupiter.version>6.0.3</junit.jupiter.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-jpa</artifactId>
-      <version>2.5.10</version>
+      <version>2.5.11</version>
     </dependency>
     <dependency>
       <groupId>javax.persistence</groupId>
@@ -45,103 +78,110 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
-      <version>5.3.23</version>
+      <version>5.3.19</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
+      <version>1.18.42</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-redis</artifactId>
-      <version>2.5.10</version>
+      <version>2.5.11</version>
     </dependency>
     <dependency>
       <groupId>com.networknt</groupId>
       <artifactId>json-schema-validator</artifactId>
-      <version>${json-schema-validator.version}</version>
+      <version>1.0.88</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.20.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.21.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.21.0</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
+      <version>2.4.240</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
+      <version>5.3.19</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>6.0.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.5.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>5.5.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.24.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
-  <scm>
-    <connection>scm:git:https://github.com/khazubaidi/statecher.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:khazubaidi/statecher.git</developerConnection>
-    <url>https://github.com/khazubaidi/statecher</url>
-  </scm>
-
-  <distributionManagement>
-    <repository>
-      <id>central</id>
-      <url>https://central.sonatype.com/api/v1/publisher</url>
-    </repository>
-  </distributionManagement>
-
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.10.1</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.0</version>
         <executions>
           <execution>
             <id>attach-sources</id>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
+            <goals><goal>jar</goal></goals>
           </execution>
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.sonatype.central</groupId>
-        <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.10.0</version>
-        <extensions>true</extensions>
-        <configuration>
-          <publishingServerId>central</publishingServerId>
-          <autoPublish>true</autoPublish>
-          <waitUntil>uploaded</waitUntil>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>3.2.4</version>
-        <configuration>
-          <gpgArguments>
-            <arg>--pinentry-mode</arg>
-            <arg>loopback</arg>
-          </gpgArguments>
-        </configuration>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.6.3</version>
         <executions>
           <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals><goal>sign</goal></goals>
+            <id>attach-javadocs</id>
+            <goals><goal>jar</goal></goals>
           </execution>
         </executions>
       </plugin>
@@ -174,6 +214,28 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals><goal>sign</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>${sonatype.deploy.version}</version>
+        <inherited>false</inherited>
+        <configuration>
+          <skipPublishing>true</skipPublishing>
+          <publishingServerId>central</publishingServerId>
+        </configuration>
       </plugin>
     </plugins>
   </build>

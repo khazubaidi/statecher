@@ -1,8 +1,7 @@
 package io.github.khazubaidi.service;
 
 import io.github.khazubaidi.bootstrapers.StatecherRegistry;
-import io.github.khazubaidi.configurations.PermissionValidator;
-import io.github.khazubaidi.exceptions.StatecherException;
+import io.github.khazubaidi.resolvers.PermissionValidatorResolver;
 import io.github.khazubaidi.exceptions.StatecherStateNotFoundException;
 import io.github.khazubaidi.markers.Statechable;
 import io.github.khazubaidi.extendables.StatecherAfterTransition;
@@ -13,9 +12,8 @@ import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
 import io.github.khazubaidi.objects.OneTimeTokeMetadata;
 import io.github.khazubaidi.utils.BeanUtils;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
+
+import javax.persistence.*;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
@@ -24,7 +22,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
 
@@ -34,10 +34,13 @@ import java.util.*;
 public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T> {
 
     private final StatecherRegistry statecherRegistry;
-    private final PermissionValidator permissionValidator;
+    private final PermissionValidatorResolver permissionValidator;
     private final BeanUtils beanUtils;
-    private final EntityManagerFactory entityManagerFactory;
     private final OneTimeTokenService oneTimeTokenService;
+    private final PlatformTransactionManager transactionManager;
+
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     @Override
     public void process(String token, String initiator, String transitionId){
@@ -60,7 +63,7 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         if(!doseLoginUserHasPermission)
             return;
 
-        boolean canAccess = runValidators(state, entity, initiator);
+        boolean canAccess = runValidators(state, entity);
         if(!canAccess)
             throw new RuntimeException("You cannot operate on this");
 
@@ -69,33 +72,46 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
                 .findFirst()
                 .orElseThrow();
 
-        runBefore(state, entity, initiator);
-        setState(metadata.getId(), stateacher.getEntity(), transition.getValue());
-        runAfter(state, entity, initiator);
+        TransactionTemplate template = new TransactionTemplate(transactionManager);
+        template.execute(status -> {
+
+            try {
+
+                runBefore(state, entity);
+                setState(metadata.getId(), stateacher.getEntity(), transition.getValue());
+                runAfter(state, entity);
+            } catch (Exception e) {
+
+                status.setRollbackOnly();
+                throw e;
+            }
+
+            return null;
+        });
     }
 
-    public boolean runValidators(State state, Statechable statechable, String initiator){
+    public boolean runValidators(State state, Statechable statechable){
 
         return state.getValidators()
                 .stream().map(validator -> beanUtils.findByName(validator, StatecherValidator.class))
-                .allMatch(validator -> validator.isValid(statechable, state, initiator));
+                .allMatch(validator -> validator.isValid(statechable, state));
     }
 
-    public void runBefore(State state, Statechable statechable, String initiator){
+    public void runBefore(State state, Statechable statechable){
 
         state.getBefore()
                 .stream().map(validator -> beanUtils.findByName(validator, StatecherBeforeTransition.class))
                 .forEach(validator -> {
-                    validator.execute(statechable, state, initiator);
+                    validator.execute(statechable, state);
                 });
     }
 
-    public void runAfter(State state, Statechable statechable, String initiator){
+    public void runAfter(State state, Statechable statechable){
 
         state.getAfter()
                 .stream().map(validator -> beanUtils.findByName(validator, StatecherAfterTransition.class))
                 .forEach(validator -> {
-                    validator.execute(statechable, state, initiator);
+                    validator.execute(statechable, state);
                 });
     }
 
@@ -137,7 +153,7 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
 
             Class<?> klass = Class.forName(entityClass);
             Class<?> idType = getIdType(klass);
-            Object entity = entityManagerFactory.createEntityManager().find(klass, TypesUtils.convertId(id, idType));
+            Object entity = entityManager.find(klass, TypesUtils.convertId(id, idType));
 
             if (!(entity instanceof Statechable))
                 throw new IllegalStateException("Entity does not implement Stateched");
@@ -151,7 +167,7 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
 
     public Class<?> getIdType(Class<?> entityClass) {
 
-        Metamodel metamodel = entityManagerFactory.createEntityManager().getMetamodel();
+        Metamodel metamodel = entityManager.getMetamodel();
         EntityType<?> entityType = metamodel.entity(entityClass);
 
         return entityType.getIdType().getJavaType();
@@ -159,12 +175,19 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
 
     public void setState(Object id, String entityClass, Object value) {
 
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
-        transaction.begin();
-        Object entity =  entityManager.merge(getEntity(id, entityClass));
-        ((Statechable) entity).setState(value);
-        transaction.commit();
-        entityManager.close();
+        try {
+
+            Class<?> klass = Class.forName(entityClass);
+            Class<?> idType = getIdType(klass);
+            Object entity = entityManager.find(klass, TypesUtils.convertId(id, idType));
+
+            if (!(entity instanceof Statechable))
+                throw new IllegalStateException("Entity does not implement Stateched");
+
+            ((Statechable) entity).setState(value);
+        } catch (ClassNotFoundException e) {
+
+            throw new RuntimeException(e);
+        }
     }
 }
