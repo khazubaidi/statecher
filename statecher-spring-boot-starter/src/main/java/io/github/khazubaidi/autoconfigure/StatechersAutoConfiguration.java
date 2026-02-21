@@ -2,8 +2,7 @@ package io.github.khazubaidi.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.khazubaidi.bootstrapers.StatecherRegistry;
-import io.github.khazubaidi.configurations.IdGenerator;
-import io.github.khazubaidi.configurations.PermissionValidator;
+import io.github.khazubaidi.resolvers.PermissionValidatorResolver;
 import io.github.khazubaidi.service.*;
 import io.github.khazubaidi.utils.BeanUtils;
 import io.github.khazubaidi.utils.BeanUtilsImpl;
@@ -18,7 +17,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 @Configuration
@@ -58,37 +59,37 @@ public class StatechersAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public StatecherInitiateService statecherInitiateService(
-            IdGenerator idGenerator,
             StatecherRegistry statecherRegistry,
-            PermissionValidator permissionValidator,
+            PermissionValidatorResolver permissionValidator,
             BeanUtils beanUtils,
-            EntityManagerFactory entityManagerFactory,
+            EntityManager entityManager,
             OneTimeTokenService oneTimeTokenService) {
 
         return new StatecherInitiateServiceImpl(
-                idGenerator,
                 statecherRegistry,
                 permissionValidator,
                 beanUtils,
-                entityManagerFactory,
-                oneTimeTokenService);
+                oneTimeTokenService,
+                entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public StatecherProcessService statecherProcessService(
             StatecherRegistry statecherRegistry,
-            PermissionValidator permissionValidator,
+            PermissionValidatorResolver permissionValidator,
             BeanUtils beanUtils,
-            EntityManagerFactory entityManagerFactory,
-            OneTimeTokenService oneTimeTokenService) {
+            OneTimeTokenService oneTimeTokenService,
+            PlatformTransactionManager transactionManager,
+            EntityManager entityManager) {
 
         return new StatecherProcessServiceImpl(
                 statecherRegistry,
                 permissionValidator,
                 beanUtils,
-                entityManagerFactory,
-                oneTimeTokenService);
+                oneTimeTokenService,
+                transactionManager,
+                entityManager);
     }
 
     @Bean
