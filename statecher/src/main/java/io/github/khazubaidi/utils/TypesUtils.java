@@ -1,6 +1,6 @@
 package io.github.khazubaidi.utils;
 
-import io.github.khazubaidi.markers.StatecherRepository;
+import io.github.khazubaidi.repositories.StatecherRepository;
 import org.springframework.core.GenericTypeResolver;
 
 public class TypesUtils {

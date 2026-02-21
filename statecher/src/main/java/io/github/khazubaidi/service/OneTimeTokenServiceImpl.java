@@ -3,7 +3,6 @@ package io.github.khazubaidi.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.khazubaidi.configurations.IdGenerator;
 import io.github.khazubaidi.exceptions.StatecherException;
 import io.github.khazubaidi.objects.OneTimeTokeMetadata;
 import lombok.RequiredArgsConstructor;
