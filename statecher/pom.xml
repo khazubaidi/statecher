@@ -5,7 +5,7 @@
   <artifactId>statecher</artifactId>
   <packaging>jar</packaging>
   <groupId>io.github.khazubaidi</groupId>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
 
   <name>Statecher</name>
   <description>State machine engine core</description>
@@ -211,6 +211,14 @@
           <publishingServerId>central</publishingServerId>
         </configuration>
       </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>10</source>
+                <target>10</target>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 </project>

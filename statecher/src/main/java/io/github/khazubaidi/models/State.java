@@ -15,7 +15,11 @@ import java.util.List;
 public class State {
 
     private List<String> validators = new ArrayList<>();
+
+    @Deprecated
     private List<String> before = new ArrayList<>();
+
+    @Deprecated
     private List<String> after = new ArrayList<>();
     private List<String> permissions = new ArrayList<>();
     private List<String> transitions = new ArrayList<>();

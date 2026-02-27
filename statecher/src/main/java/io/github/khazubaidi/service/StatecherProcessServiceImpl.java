@@ -1,12 +1,11 @@
 package io.github.khazubaidi.service;
 
 import io.github.khazubaidi.bootstrapers.StatecherRegistry;
+import io.github.khazubaidi.commands.StatecherProcessCommand;
+import io.github.khazubaidi.extendables.*;
 import io.github.khazubaidi.resolvers.PermissionValidatorResolver;
 import io.github.khazubaidi.exceptions.StatecherStateNotFoundException;
 import io.github.khazubaidi.markers.Statechable;
-import io.github.khazubaidi.extendables.StatecherAfterTransition;
-import io.github.khazubaidi.extendables.StatecherBeforeTransition;
-import io.github.khazubaidi.extendables.StatecherValidator;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
@@ -17,6 +16,7 @@ import javax.persistence.*;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
+import io.github.khazubaidi.utils.DataUtils;
 import io.github.khazubaidi.utils.TypesUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -43,9 +45,11 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
     private final EntityManager entityManager;
 
     @Override
-    public void process(String token, String initiator, String transitionId){
+    public void process(StatecherProcessCommand command){
 
-        OneTimeTokeMetadata metadata = oneTimeTokenService.consume(initiator, token);
+        //todo validation
+
+        OneTimeTokeMetadata metadata = oneTimeTokenService.consume(command.getInitiator(), command.getToken());
         boolean doseStatecherExists = statecherRegistry.exists(metadata.getName());
         if(!doseStatecherExists)
             throw new RuntimeException();
@@ -57,37 +61,58 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         if(!hasState)
             throw new StatecherStateNotFoundException("State (" + entity.getState() + ") not found within statecher (" + metadata.getName() + ").");
 
-        State state = findState(stateacher, entity.getState());
+        State currentState = findState(stateacher, entity.getState());
 
-        boolean doseLoginUserHasPermission = permissionValidator.hasAny(state.getPermissions());
+        boolean doseLoginUserHasPermission = permissionValidator.hasAny(currentState.getPermissions());
         if(!doseLoginUserHasPermission)
             return;
 
-        boolean canAccess = runValidators(state, entity);
+        boolean canAccess = runValidators(currentState, entity);
         if(!canAccess)
             throw new RuntimeException("You cannot operate on this");
 
-        List<Transition> transitions = getTransitions(stateacher.getTransitions(), state.getTransitions());
-        Transition transition = transitions.stream().filter(t -> t.getId().equals(transitionId))
+        List<Transition> transitions = getTransitions(stateacher.getTransitions(), currentState.getTransitions());
+        Transition oldState = stateacher.getTransitions().get(entity.getState());
+        Transition newState = transitions.stream()
+                .filter(t -> t.getId().equals(command.getTransitionId()))
                 .findFirst()
                 .orElseThrow();
 
+        State nextState = findState(stateacher, newState.getValue());
         TransactionTemplate template = new TransactionTemplate(transactionManager);
         template.execute(status -> {
+            runBefore(currentState, entity);
 
             try {
 
-                runBefore(state, entity);
-                setState(metadata.getId(), stateacher.getEntity(), transition.getValue());
-                runAfter(state, entity);
+                runOnExit(oldState, currentState, nextState, entity);
+                setState(metadata.getId(), stateacher.getEntity(), newState.getValue());
+                runFormProcessor(newState.getForm(), entity, command.getData());
+                runOnEnter(newState, nextState, currentState, entity);
             } catch (Exception e) {
 
                 status.setRollbackOnly();
                 throw e;
             }
 
+            runAfter(currentState, entity);
             return null;
         });
+    }
+
+    public void runFormProcessor(Transition.Form form, Statechable statechable, Map<String, Object> data){
+
+        if(Objects.isNull(form))
+            return;
+
+        if(Objects.isNull(statechable))
+            return;
+
+        if(CollectionUtils.isEmpty(data))
+            return;
+
+        var formProcessor = beanUtils.findByName(form.getProcessor(), FormProcessor.class);
+        formProcessor.process(statechable, data);
     }
 
     public boolean runValidators(State state, Statechable statechable){
@@ -103,6 +128,25 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
                 .stream().map(validator -> beanUtils.findByName(validator, StatecherBeforeTransition.class))
                 .forEach(validator -> {
                     validator.execute(statechable, state);
+                });
+    }
+
+    public void runOnExit(Transition transition, State currentState, State nextState, Statechable statechable){
+
+        transition.getOnExist()
+                .stream()
+                .map(t -> beanUtils.findByName(t, OnExistTransition.class))
+                .forEach(t -> {
+                    t.onExist(statechable, currentState, nextState);
+                });
+    }
+
+    public void runOnEnter(Transition transition, State currentState, State previousState, Statechable statechable){
+
+        transition.getOnEnter()
+                .stream().map(t -> beanUtils.findByName(t, OnEnterTransition.class))
+                .forEach(t -> {
+                    t.onEnter(statechable, currentState, previousState);
                 });
     }
 
@@ -139,8 +183,12 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         List<Transition> transitions = new ArrayList<>();
         availableTransitions.forEach((key, transition) -> {
 
-            if(allowedTransition.contains(key))
+            if(allowedTransition.contains(key)){
+
+                transition.setValue(key);
                 transitions.add(transition);
+            }
+
         });
 
         return transitions;
