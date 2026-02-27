@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Setter
@@ -13,7 +16,20 @@ import java.util.Map;
 @AllArgsConstructor
 public class Transition {
 
-    private Object value;
+    private String value;
     private String id;
-    private Map<String, Object> extras;
+    private List<String> onExist = new ArrayList<>();
+    private List<String> onEnter = new ArrayList<>();
+    private Map<String, Object> extras = new HashMap<>();
+    private Form form = new Form();
+
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Form {
+
+        private String processor;
+        private Map<String, Object> extras = new HashMap<>();
+    }
 }

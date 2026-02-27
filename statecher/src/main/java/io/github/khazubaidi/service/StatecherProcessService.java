@@ -1,6 +1,8 @@
 package io.github.khazubaidi.service;
 
+import io.github.khazubaidi.commands.StatecherProcessCommand;
+
 public interface StatecherProcessService<T> {
 
-    void process(String token, String initiator, String transitionId);
+    void process(StatecherProcessCommand command);
 }

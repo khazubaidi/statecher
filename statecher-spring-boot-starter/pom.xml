@@ -5,7 +5,7 @@
   <artifactId>statecher-spring-boot-starter</artifactId>
   <packaging>jar</packaging>
   <groupId>io.github.khazubaidi</groupId>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
 
   <name>Statecher Spring Boot Starter</name>
   <description>Statecher a state machine engine spring boot starter</description>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>io.github.khazubaidi</groupId>
       <artifactId>statecher</artifactId>
-      <version>0.0.2</version>
+      <version>0.0.3</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

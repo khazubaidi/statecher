@@ -3,8 +3,10 @@ package io.github.khazubaidi.objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Getter
@@ -17,7 +19,10 @@ public class StatecherObject {
 
         this.id = id;
         this.transitions = transitions.stream()
-                .map(transition -> new Transition(transition.getId(), transition.getExtras()))
+                .map(transition -> new Transition(
+                        transition.getId(),
+                        transition.getExtras(),
+                        transition.getForm().getExtras()))
                 .collect(Collectors.toList());
     }
 
@@ -27,5 +32,6 @@ public class StatecherObject {
 
         private String id;
         private Map<String, Object> extras;
+        private Map<String, Object> form;
     }
 }
