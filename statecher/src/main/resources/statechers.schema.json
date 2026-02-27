@@ -26,14 +26,22 @@
   "$defs": {
     "transition": {
       "type": "object",
-      "required": ["value", "id"],
+      "required": ["id"],
       "properties": {
-        "value": {
-          "type": "string"
-        },
         "id": {
           "type": "string",
           "format": "uuid"
+        },
+        "onExist": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "onEnter": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "form": {
+          "$ref": "#/$defs/form"
         },
         "extras": {
           "$ref": "#/$defs/extras"
@@ -44,6 +52,16 @@
     "extras": {
       "type": "object",
       "additionalProperties": true
+    },
+    "form": {
+      "required": ["processor", "extras"],
+      "type": "object",
+      "processor": {
+        "type": "string"
+      },
+      "extras": {
+        "type": "object"
+      }
     },
     "state": {
       "type": "object",

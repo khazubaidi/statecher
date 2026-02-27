@@ -1,10 +1,12 @@
 package io.github.khazubaidi.autoconfigure;
 
 import io.github.khazubaidi.exceptions.StatecherValidationException;
+import io.github.khazubaidi.extendables.FormProcessor;
 import io.github.khazubaidi.extendables.StatecherAfterTransition;
 import io.github.khazubaidi.extendables.StatecherBeforeTransition;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
+import io.github.khazubaidi.models.Transition;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,17 @@ public class BeanReferenceValidator {
 
         validateEntities(statecher.getEntity());
         validateTransitions(statecher.getStates());
+        validateForms(statecher.getTransitions());
+        validatePreStates(statecher.getTransitions());
+    }
+
+    private void validateForms(Map<String, Transition> transitions) {
+
+        Set<String> formProcessors = transitions.values()
+                .stream()
+                .map(t -> t.getForm().getProcessor())
+                .collect(Collectors.toSet());
+        validateOfType(formProcessors, FormProcessor.class);
     }
 
     private void validateEntities(String entityClass)  {
@@ -60,6 +73,27 @@ public class BeanReferenceValidator {
             throw new StatecherValidationException("Bean " + entityClass + " not found.");
         }
     }
+
+    private void validatePreStates(Map<String, Transition> transitions) {
+
+        if (CollectionUtils.isEmpty(transitions))
+            throw new StatecherValidationException("States is required");
+
+        Set<String> onEnters = transitions.values()
+                .stream()
+                .map(Transition::getOnEnter)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+        validateOfType(onEnters, StatecherBeforeTransition.class);
+
+        Set<String> onExist = transitions.values()
+                .stream()
+                .map(Transition::getOnExist)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+        validateOfType(onExist, StatecherAfterTransition.class);
+    }
+
 
     private void validateTransitions(Map<String, State> states) {
 
@@ -93,7 +127,7 @@ public class BeanReferenceValidator {
 
             try {
 
-                Class<?> clazz = Class.forName(reference);
+                Class<?> clazz = Class.forName(reference.trim());
                 applicationContext.getBeansOfType(clazz);
 
                 log.debug("Service bean found: {}", reference);
