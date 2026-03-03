@@ -81,8 +81,6 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         State nextState = findState(stateacher, newState.getValue());
         TransactionTemplate template = new TransactionTemplate(transactionManager);
         template.execute(status -> {
-            runBefore(currentState, entity);
-
             try {
 
                 runOnExit(oldState, currentState, nextState, entity);
@@ -94,8 +92,6 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
                 status.setRollbackOnly();
                 throw e;
             }
-
-            runAfter(currentState, entity);
             return null;
         });
     }
@@ -122,14 +118,6 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
                 .allMatch(validator -> validator.isValid(statechable, state));
     }
 
-    public void runBefore(State state, Statechable statechable){
-
-        state.getBefore()
-                .stream().map(validator -> beanUtils.findByName(validator, StatecherBeforeTransition.class))
-                .forEach(validator -> {
-                    validator.execute(statechable, state);
-                });
-    }
 
     public void runOnExit(Transition transition, State currentState, State nextState, Statechable statechable){
 
@@ -147,15 +135,6 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
                 .stream().map(t -> beanUtils.findByName(t, OnEnterTransition.class))
                 .forEach(t -> {
                     t.onEnter(statechable, currentState, previousState);
-                });
-    }
-
-    public void runAfter(State state, Statechable statechable){
-
-        state.getAfter()
-                .stream().map(validator -> beanUtils.findByName(validator, StatecherAfterTransition.class))
-                .forEach(validator -> {
-                    validator.execute(statechable, state);
                 });
     }
 
