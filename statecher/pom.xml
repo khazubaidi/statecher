@@ -5,7 +5,7 @@
   <artifactId>statecher</artifactId>
   <packaging>jar</packaging>
   <groupId>io.github.khazubaidi</groupId>
-  <version>0.0.4</version>
+  <version>0.0.5</version>
 
   <name>Statecher</name>
   <description>State machine engine core</description>
