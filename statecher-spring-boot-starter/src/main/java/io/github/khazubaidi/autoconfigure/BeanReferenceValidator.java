@@ -1,10 +1,8 @@
 package io.github.khazubaidi.autoconfigure;
 
+
 import io.github.khazubaidi.exceptions.StatecherValidationException;
 import io.github.khazubaidi.extendables.FormProcessor;
-import io.github.khazubaidi.extendables.StatecherAfterTransition;
-import io.github.khazubaidi.extendables.StatecherBeforeTransition;
-import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
 import org.apache.commons.lang3.StringUtils;
@@ -39,14 +37,12 @@ public class BeanReferenceValidator {
     public void validate(Statecher statecher) {
 
         validateEntities(statecher.getEntity());
-        validateTransitions(statecher.getStates());
         validateForms(statecher.getTransitions());
-        validatePreStates(statecher.getTransitions());
     }
 
-    private void validateForms(Map<String, Transition> transitions) {
+    private void validateForms(Map<String, Transition> states) {
 
-        Set<String> formProcessors = transitions.values()
+        Set<String> formProcessors = states.values()
                 .stream()
                 .map(t -> t.getForm().getProcessor())
                 .collect(Collectors.toSet());
@@ -72,47 +68,6 @@ public class BeanReferenceValidator {
 
             throw new StatecherValidationException("Bean " + entityClass + " not found.");
         }
-    }
-
-    private void validatePreStates(Map<String, Transition> transitions) {
-
-        if (CollectionUtils.isEmpty(transitions))
-            throw new StatecherValidationException("States is required");
-
-        Set<String> onEnters = transitions.values()
-                .stream()
-                .map(Transition::getOnEnter)
-                .flatMap(List::stream)
-                .collect(Collectors.toSet());
-        validateOfType(onEnters, StatecherBeforeTransition.class);
-
-        Set<String> onExist = transitions.values()
-                .stream()
-                .map(Transition::getOnExist)
-                .flatMap(List::stream)
-                .collect(Collectors.toSet());
-        validateOfType(onExist, StatecherAfterTransition.class);
-    }
-
-
-    private void validateTransitions(Map<String, State> states) {
-
-        if (CollectionUtils.isEmpty(states))
-            throw new StatecherValidationException("States is required");
-
-        Set<String> beforeTransition = states.values()
-                .stream()
-                .map(State::getBefore)
-                .flatMap(List::stream)
-                .collect(Collectors.toSet());
-        validateOfType(beforeTransition, StatecherBeforeTransition.class);
-
-        Set<String> afterTransition = states.values()
-                .stream()
-                .map(State::getAfter)
-                .flatMap(List::stream)
-                .collect(Collectors.toSet());
-        validateOfType(afterTransition, StatecherAfterTransition.class);
     }
 
     private <T> void validateOfType(Set<String> references, Class<T> type) {
