@@ -6,8 +6,6 @@ The idea is straightforward: instead of hardcoding workflow logic all over your 
 
 This helps keep business logic cleaner and makes workflows easier to change without digging through code.
 
----
-
 ## Roadmap
 
 Things that still need work:
@@ -17,8 +15,6 @@ Things that still need work:
 - Configuration validation  
 - Programmatic rollback  
 - History tracking / control  
-
----
 
 ## Notes
 
