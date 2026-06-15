@@ -6,16 +6,6 @@ The idea is straightforward: instead of hardcoding workflow logic all over your 
 
 This helps keep business logic cleaner and makes workflows easier to change without digging through code.
 
-## Roadmap
-
-Things that still need work:
-
-- Unit tests  
-- XML configuration support  
-- Configuration validation  
-- Programmatic rollback  
-- History tracking / control  
-
 ## Notes
 
 This is still evolving. Expect rough edges.
