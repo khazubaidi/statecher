@@ -1,5 +1,6 @@
-package io.github.khazubaidi.extendables;
+package io.github.khazubaidi.contracts;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public interface FormProcessor<T> {

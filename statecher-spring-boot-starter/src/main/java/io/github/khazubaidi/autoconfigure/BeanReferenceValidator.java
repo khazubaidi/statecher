@@ -2,7 +2,7 @@ package io.github.khazubaidi.autoconfigure;
 
 
 import io.github.khazubaidi.exceptions.StatecherValidationException;
-import io.github.khazubaidi.extendables.FormProcessor;
+import io.github.khazubaidi.contracts.FormProcessor;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
 import org.apache.commons.lang3.StringUtils;
@@ -10,10 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityManagerFactory;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,7 +42,7 @@ public class BeanReferenceValidator {
 
         Set<String> formProcessors = states.values()
                 .stream()
-                .map(t -> t.getForm().getProcessor())
+                .map(Transition::getForm)
                 .collect(Collectors.toSet());
         validateOfType(formProcessors, FormProcessor.class);
     }

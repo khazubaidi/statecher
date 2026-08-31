@@ -1,4 +1,4 @@
-package io.github.khazubaidi.markers;
+package io.github.khazubaidi;
 
 public interface Statechable<T> {
 

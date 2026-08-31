@@ -2,8 +2,8 @@ package io.github.khazubaidi.service;
 
 import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.resolvers.PermissionValidatorResolver;
-import io.github.khazubaidi.markers.Statechable;
-import io.github.khazubaidi.extendables.StatecherValidator;
+import io.github.khazubaidi.Statechable;
+import io.github.khazubaidi.contracts.StatecherValidator;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;

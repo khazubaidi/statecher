@@ -32,11 +32,11 @@
           "type": "string",
           "format": "uuid"
         },
-        "onExist": {
+        "onEnd": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "onEnter": {
+        "onStart": {
           "type": "array",
           "items": { "type": "string" }
         },
@@ -54,14 +54,7 @@
       "additionalProperties": true
     },
     "form": {
-      "required": ["processor", "extras"],
-      "type": "object",
-      "processor": {
-        "type": "string"
-      },
-      "extras": {
-        "type": "object"
-      }
+      "type": "string"
     },
     "state": {
       "type": "object",
@@ -71,11 +64,11 @@
           "type": "array",
           "items": { "type": "string" }
         },
-        "before": {
+        "onExit": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "after": {
+        "onEnter": {
           "type": "array",
           "items": { "type": "string" }
         },

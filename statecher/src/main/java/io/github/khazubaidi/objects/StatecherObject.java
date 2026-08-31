@@ -21,8 +21,7 @@ public class StatecherObject {
         this.transitions = transitions.stream()
                 .map(transition -> new Transition(
                         transition.getId(),
-                        transition.getExtras(),
-                        transition.getForm().getExtras()))
+                        transition.getExtras()))
                 .collect(Collectors.toList());
     }
 
@@ -32,6 +31,5 @@ public class StatecherObject {
 
         private String id;
         private Map<String, Object> extras;
-        private Map<String, Object> form;
     }
 }

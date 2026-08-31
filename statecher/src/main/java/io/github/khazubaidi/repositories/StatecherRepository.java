@@ -1,6 +1,6 @@
 package io.github.khazubaidi.repositories;
 
-import io.github.khazubaidi.markers.Statechable;
+import io.github.khazubaidi.Statechable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 

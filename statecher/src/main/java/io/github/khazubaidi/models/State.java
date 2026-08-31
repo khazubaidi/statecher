@@ -17,4 +17,6 @@ public class State {
     private List<String> validators = new ArrayList<>();
     private List<String> permissions = new ArrayList<>();
     private List<String> transitions = new ArrayList<>();
+    private List<String> onEnter = new ArrayList<>();
+    private List<String> onExit = new ArrayList<>();
 }

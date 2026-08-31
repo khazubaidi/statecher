@@ -1,4 +1,4 @@
-package io.github.khazubaidi.extendables;
+package io.github.khazubaidi.contracts;
 
 import io.github.khazubaidi.models.State;
 

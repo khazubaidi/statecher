@@ -18,18 +18,8 @@ public class Transition {
 
     private String value;
     private String id;
-    private List<String> onExist = new ArrayList<>();
-    private List<String> onEnter = new ArrayList<>();
+    private List<String> onStart = new ArrayList<>();
+    private List<String> onEnd = new ArrayList<>();
     private Map<String, Object> extras = new HashMap<>();
-    private Form form = new Form();
-
-    @Setter
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Form {
-
-        private String processor;
-        private Map<String, Object> extras = new HashMap<>();
-    }
+    private String form;
 }

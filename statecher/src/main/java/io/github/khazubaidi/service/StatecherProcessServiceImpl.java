@@ -2,10 +2,11 @@ package io.github.khazubaidi.service;
 
 import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.commands.StatecherProcessCommand;
-import io.github.khazubaidi.extendables.*;
+import io.github.khazubaidi.contracts.*;
+import io.github.khazubaidi.markers.StatecherTransition;
 import io.github.khazubaidi.resolvers.PermissionValidatorResolver;
 import io.github.khazubaidi.exceptions.StatecherStateNotFoundException;
-import io.github.khazubaidi.markers.Statechable;
+import io.github.khazubaidi.Statechable;
 import io.github.khazubaidi.models.State;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.models.Transition;
@@ -16,7 +17,6 @@ import javax.persistence.*;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
-import io.github.khazubaidi.utils.DataUtils;
 import io.github.khazubaidi.utils.TypesUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -81,24 +81,30 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         State nextState = findState(stateacher, newState.getValue());
         TransactionTemplate template = new TransactionTemplate(transactionManager);
         template.execute(status -> {
+
+            var rollbackables = new ArrayList<Rollbackable>();
             try {
 
-                runOnExit(oldState, currentState, nextState, entity);
-                setState(metadata.getId(), stateacher.getEntity(), newState.getValue());
+                runOnStart(oldState, currentState, nextState, entity, rollbackables);
+                runOnExit(currentState, entity, rollbackables);
+                runOnEnd(newState, nextState, currentState, entity, rollbackables);
+                runOnEnter(nextState, entity, rollbackables);
                 runFormProcessor(newState.getForm(), entity, command.getData());
-                runOnEnter(newState, nextState, currentState, entity);
+                setState(metadata.getId(), stateacher.getEntity(), newState.getValue());
             } catch (Exception e) {
 
+                runRollbacks(rollbackables, currentState, nextState, entity);
                 status.setRollbackOnly();
                 throw e;
             }
+
             return null;
         });
     }
 
-    public void runFormProcessor(Transition.Form form, Statechable statechable, Map<String, Object> data){
+    public void runFormProcessor(String form, Statechable statechable, Map<String, Object> data){
 
-        if(Objects.isNull(form))
+        if(StringUtils.isBlank(form))
             return;
 
         if(Objects.isNull(statechable))
@@ -107,7 +113,7 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
         if(CollectionUtils.isEmpty(data))
             return;
 
-        var formProcessor = beanUtils.findByName(form.getProcessor(), FormProcessor.class);
+        var formProcessor = beanUtils.findByName(form, FormProcessor.class);
         formProcessor.process(statechable, data);
     }
 
@@ -118,24 +124,111 @@ public class StatecherProcessServiceImpl<T> implements StatecherProcessService<T
                 .allMatch(validator -> validator.isValid(statechable, state));
     }
 
+    public void runRollbacks(List<Rollbackable> rollbackables, State currentState, State previousState, Statechable statechable){
 
-    public void runOnExit(Transition transition, State currentState, State nextState, Statechable statechable){
+        if(rollbackables == null || rollbackables.isEmpty())
+            return;
 
-        transition.getOnExist()
-                .stream()
-                .map(t -> beanUtils.findByName(t, OnExistTransition.class))
+        rollbackables
                 .forEach(t -> {
-                    t.onExist(statechable, currentState, nextState);
+                    try {
+                        t.onRollback(statechable, currentState, previousState);
+                    } catch (Exception e) {
+
+                        log.error(e.getMessage(), e);
+                    }
                 });
     }
 
-    public void runOnEnter(Transition transition, State currentState, State previousState, Statechable statechable){
+    public void runOnExit(
+            State state,
+            Statechable statechable,
+            List<Rollbackable> rollbackables){
 
-        transition.getOnEnter()
-                .stream().map(t -> beanUtils.findByName(t, OnEnterTransition.class))
-                .forEach(t -> {
-                    t.onEnter(statechable, currentState, previousState);
-                });
+        if(state.getOnExit() == null || state.getOnExit().isEmpty())
+            return;
+
+        var onExists = state.getOnExit()
+                .stream()
+                .map(t -> beanUtils.findByName(t, StateExit.class))
+                .collect(Collectors.toList());
+
+        for (StateExit onExit : onExists) {
+
+            onExit.onExit(statechable, state);
+
+            if(onExit instanceof Rollbackable)
+                rollbackables.add((Rollbackable)onExit);
+        }
+    }
+
+
+    public void runOnEnter(
+            State state,
+            Statechable statechable,
+            List<Rollbackable> rollbackables){
+
+        if(state.getOnExit() == null || state.getOnExit().isEmpty())
+            return;
+
+        var onEnters = state.getOnExit()
+                .stream()
+                .map(t -> beanUtils.findByName(t, StateEnter.class))
+                .collect(Collectors.toList());
+
+        for (StateEnter onEnter : onEnters) {
+
+            onEnter.onEnter(statechable, state);
+
+            if(onEnter instanceof Rollbackable)
+                rollbackables.add((Rollbackable)onEnter);
+        }
+    }
+
+    public void runOnStart(
+            Transition transition,
+            State currentState,
+            State previousState,
+            Statechable statechable,
+            List<Rollbackable> rollbackables){
+
+        if(transition.getOnStart() == null || transition.getOnStart().isEmpty())
+            return;
+
+        var onStarts =  transition.getOnStart()
+                .stream().map(t -> beanUtils.findByName(t, TransitionStart.class))
+                .collect(Collectors.toList());
+
+        for (TransitionStart onStart : onStarts) {
+
+            onStart.onStart(statechable, currentState, previousState);
+
+            if(onStart instanceof Rollbackable)
+                rollbackables.add((Rollbackable)onStart);
+        }
+    }
+
+    public void runOnEnd(
+            Transition transition,
+            State currentState,
+            State previousState,
+            Statechable statechable,
+            List<Rollbackable> rollbackables){
+
+        if(transition.getOnEnd() == null || transition.getOnEnd().isEmpty())
+            return;
+
+        var onEnds = transition.getOnEnd()
+                .stream().map(t -> beanUtils.findByName(t, TransitionEnd.class))
+                .collect(Collectors.toList());
+
+        for (TransitionEnd transitionEnd : onEnds) {
+
+            transitionEnd.onEnd(statechable, currentState, previousState);
+
+            if(transitionEnd instanceof Rollbackable)
+                rollbackables.add((Rollbackable)transitionEnd);
+        }
     }
 
     public boolean hasState(Statecher stateacher, String currentState){
