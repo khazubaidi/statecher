@@ -13,9 +13,9 @@ import io.github.khazubaidi.models.Transition;
 import io.github.khazubaidi.objects.OneTimeTokeMetadata;
 import io.github.khazubaidi.utils.BeanUtils;
 
-import javax.persistence.*;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
+import jakarta.persistence.*;
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.Metamodel;
 
 import io.github.khazubaidi.utils.TypesUtils;
 import lombok.RequiredArgsConstructor;

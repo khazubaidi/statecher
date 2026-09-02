@@ -1,8 +1,8 @@
 package io.github.khazubaidi.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import io.github.khazubaidi.exceptions.StatecherException;
 import io.github.khazubaidi.objects.OneTimeTokeMetadata;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +56,7 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
                     key(TOKEN_METADATA_BUCKET, key, token),
                     value,
                     ttl.plusMinutes(5));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
 
             throw new RuntimeException("Couldn't serialize data object.");
         }
@@ -69,7 +69,7 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
             String value = redisTemplate.opsForValue().get(key(TOKEN_METADATA_BUCKET, key, token));
             redisTemplate.delete(key(TOKEN_METADATA_BUCKET, key, token));
             return objectMapper.readValue(value, new TypeReference<OneTimeTokeMetadata>() {});
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
 
             throw new RuntimeException(e);
         }

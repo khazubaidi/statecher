@@ -3,8 +3,7 @@ package io.github.khazubaidi.autoconfigure;
 import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.models.Statecher;
 import io.github.khazubaidi.validations.JsonSchemaValidator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.ValidationMessage;
+import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -89,7 +88,7 @@ public class StatecherLoader implements InitializingBean {
 
         try (InputStream inputStream = resource.getInputStream()) {
 
-            Set<ValidationMessage> schemaErrors = schemaValidator.validate(inputStream);
+            Set<String> schemaErrors = schemaValidator.validate(inputStream);
 
             if (!schemaErrors.isEmpty()) {
 

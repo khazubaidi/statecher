@@ -1,6 +1,7 @@
 package io.github.khazubaidi.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import tools.jackson.databind.ObjectMapper;
 import io.github.khazubaidi.bootstrapers.StatecherRegistry;
 import io.github.khazubaidi.resolvers.PermissionValidatorResolver;
 import io.github.khazubaidi.service.*;
@@ -19,8 +20,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 @Configuration
 @ConditionalOnProperty(prefix = "statechers", name = "enabled", havingValue = "true", matchIfMissing = true)
@@ -74,6 +75,11 @@ public class StatechersAutoConfiguration {
     }
 
     @Bean
+    public ResourcePatternResolver resourcePatternResolver() {
+        return new PathMatchingResourcePatternResolver();
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     public StatecherProcessService statecherProcessService(
             StatecherRegistry statecherRegistry,
@@ -102,7 +108,7 @@ public class StatechersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public StatecherLoader statechersLoader(ResourcePatternResolver resourceResolver,
+    public StatecherLoader statechersLoader(ResourcePatternResolver resourcePatternResolver,
                                             ObjectMapper objectMapper,
                                             JsonSchemaValidator schemaValidator,
                                             StatecherRegistry statecherRegistry,
@@ -110,7 +116,7 @@ public class StatechersAutoConfiguration {
                                             BeanReferenceValidator beanReferenceValidator) {
 
         return new StatecherLoader(
-                resourceResolver,
+                resourcePatternResolver,
                 objectMapper,
                 schemaValidator,
                 statecherRegistry,

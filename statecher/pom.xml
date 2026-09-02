@@ -5,7 +5,7 @@
   <artifactId>statecher</artifactId>
   <packaging>jar</packaging>
   <groupId>io.github.khazubaidi</groupId>
-  <version>0.0.6</version>
+  <version>0.1.0</version>
 
   <name>Statecher</name>
   <description>State machine engine core</description>
@@ -35,24 +35,24 @@
   </scm>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>17</java.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-jpa</artifactId>
-      <version>2.5.11</version>
+      <version>4.0.7</version>
     </dependency>
     <dependency>
-      <groupId>javax.persistence</groupId>
-      <artifactId>javax.persistence-api</artifactId>
-      <version>2.2</version>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
-      <version>5.3.19</version>
+      <version>6.2.7</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -63,12 +63,12 @@
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-redis</artifactId>
-      <version>2.5.11</version>
+      <version>4.0.7</version>
     </dependency>
     <dependency>
       <groupId>com.networknt</groupId>
       <artifactId>json-schema-validator</artifactId>
-      <version>1.0.88</version>
+      <version>3.0.7</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -78,15 +78,9 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
+      <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.21.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>2.21.0</version>
+      <version>3.2.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -98,7 +92,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>5.3.19</version>
+      <version>6.2.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -215,8 +209,8 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
-                <source>10</source>
-                <target>10</target>
+                <source>17</source>
+                <target>17</target>
             </configuration>
         </plugin>
     </plugins>

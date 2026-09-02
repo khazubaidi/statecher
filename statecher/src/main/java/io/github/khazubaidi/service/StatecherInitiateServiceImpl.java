@@ -11,8 +11,8 @@ import io.github.khazubaidi.objects.OneTimeTokeMetadata;
 import io.github.khazubaidi.objects.StatecherObject;
 import io.github.khazubaidi.utils.BeanUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
